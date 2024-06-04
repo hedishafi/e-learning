@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dbname
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "5598:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/html:z
+      - dbdata:/var/lib/mysql
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: dbuser
+      DB_PASSWORD: dbpass
+      DB_NAME: dbname
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db
+      PMA_USER: dbuser
+      PMA_PASSWORD: dbpass
+
+volumes:
+  dbdata:
+
